@@ -14,6 +14,7 @@
 
 // Own Headers
 #include "Event.h"
+#include "SwapChain.h"
 
 struct WindowSettings
 {
@@ -26,34 +27,30 @@ struct WindowSettings
 class Window
 {
 public:
-	Window(const WindowSettings& settings, EventListener* listener);
+	Window(const WindowSettings& settings, WNDPROC windowCallback, bool tearingSupported);
 	~Window();
-
-	void createSwapChain(Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue, uint32_t width, uint32_t height, uint32_t bufferCount);
 
 	void show();
 
-	void resize();
-
-	bool isVSync() { return m_vSync; }
-	void setVSync(bool vSync) { m_vSync = vSync; }
+	void onResize();
 
 	bool isFullscreen() const { return m_fullscreen; }
 	void setFullscreen(bool fullscreen);
 
+	void setSwapChain(const std::shared_ptr<SwapChain>& swapChain) { m_swapChain = swapChain; }
+	const std::shared_ptr<SwapChain> getSwapChain() const { return m_swapChain; }
+
 	HWND getWindowHandle() const { return m_windowHandle; }
 
-	uint32_t getBackBufferIndex() const;
-
 private:
-	void registerWindowClass(HINSTANCE hInstance, const wchar_t* windowClassName);
+	friend LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+	void registerWindowClass(HINSTANCE hInstance, const wchar_t* windowClassName, WNDPROC windowCallback);
 	void createWindow(const wchar_t* windowClassName, HINSTANCE hInstance, const wchar_t* appName, uint32_t width, uint32_t height);
 
 private:
 	HWND m_windowHandle = nullptr;
 	RECT m_windowRect;
-
-	bool m_vSync = true;
 
 	bool m_tearingSupported = false;
 	bool m_fullscreen = false;
@@ -61,5 +58,5 @@ private:
 	uint32_t m_width;
 	uint32_t m_height;
 
-	Microsoft::WRL::ComPtr<IDXGISwapChain4> m_swapChain;
+	std::shared_ptr<SwapChain> m_swapChain;
 };
