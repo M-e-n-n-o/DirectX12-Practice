@@ -28,7 +28,7 @@ class Window
 {
 public:
 	Window(const WindowSettings& settings, WNDPROC windowCallback, bool tearingSupported);
-	~Window();
+	~Window() = default;
 
 	void show();
 
@@ -49,14 +49,14 @@ private:
 	void createWindow(const wchar_t* windowClassName, HINSTANCE hInstance, const wchar_t* appName, uint32_t width, uint32_t height);
 
 private:
-	HWND m_windowHandle = nullptr;
-	RECT m_windowRect;
+	HWND							m_windowHandle = nullptr;
+	RECT							m_windowRect;
 
-	bool m_tearingSupported = false;
-	bool m_fullscreen = false;
+	bool							m_tearingSupported = false;
+	bool							m_fullscreen = false;
 
-	uint32_t m_width;
-	uint32_t m_height;
+	uint32_t						m_width;
+	uint32_t						m_height;
 
-	std::shared_ptr<SwapChain> m_swapChain;
+	std::shared_ptr<SwapChain>		m_swapChain;
 };

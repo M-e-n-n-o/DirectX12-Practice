@@ -1,8 +1,5 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
 // Windows Runtime Library. Needed for Microsoft::WRL::ComPtr<> template class.
 #include <wrl.h>
 
@@ -38,18 +35,15 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors);
 
 private:
-	Microsoft::WRL::ComPtr<IDXGISwapChain4> m_swapChain;
-
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_RTVDescriptorHeap;
-	UINT m_RTVDescriptorSize;
-
-	UINT m_currentBackBufferIndex;
-
-	bool m_vSync = true;
-	bool m_isTearingSupported;
-
-	uint32_t m_bufferCount;
+	Microsoft::WRL::ComPtr<IDXGISwapChain4>				m_swapChain;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>		m_RTVDescriptorHeap;
+	UINT												m_RTVDescriptorSize;
+	uint32_t											m_bufferCount;
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> m_backBuffers;
+	UINT												m_currentBackBufferIndex;
 
-	Microsoft::WRL::ComPtr<ID3D12Device2> m_device;
+	bool												m_vSync = true;
+	bool												m_isTearingSupported;
+
+	Microsoft::WRL::ComPtr<ID3D12Device2>				m_device;
 };

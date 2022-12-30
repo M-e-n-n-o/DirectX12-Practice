@@ -166,6 +166,7 @@
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CommandQueue.cpp" />
     <ClCompile Include="src\DirectX.cpp" />
     <ClCompile Include="src\dxpch.cpp" />
     <ClCompile Include="src\SwapChain.cpp" />

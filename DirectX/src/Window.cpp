@@ -16,11 +16,6 @@ Window::Window(const WindowSettings& settings, WNDPROC windowCallback, bool tear
     m_height = m_windowRect.bottom - m_windowRect.top;
 }
 
-Window::~Window()
-{
-
-}
-
 void Window::show()
 {
     ::ShowWindow(m_windowHandle, SW_SHOW);
