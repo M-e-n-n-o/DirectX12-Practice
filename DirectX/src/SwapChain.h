@@ -35,6 +35,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors);
 
 private:
+	Microsoft::WRL::ComPtr<ID3D12Device2>				m_device;
+
 	Microsoft::WRL::ComPtr<IDXGISwapChain4>				m_swapChain;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>		m_RTVDescriptorHeap;
 	UINT												m_RTVDescriptorSize;
@@ -44,6 +46,4 @@ private:
 
 	bool												m_vSync = true;
 	bool												m_isTearingSupported;
-
-	Microsoft::WRL::ComPtr<ID3D12Device2>				m_device;
 };

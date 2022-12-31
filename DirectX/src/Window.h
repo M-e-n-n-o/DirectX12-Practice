@@ -21,18 +21,19 @@ struct WindowSettings
 	const wchar_t* title;
 	uint32_t width;
 	uint32_t height;
+	bool tearingSupported;
 	HINSTANCE hInstance;
 };
 
 class Window
 {
 public:
-	Window(const WindowSettings& settings, WNDPROC windowCallback, bool tearingSupported);
+	Window(const WindowSettings& settings, EventListener* listener);
 	~Window() = default;
 
 	void show();
 
-	void onResize();
+	void onResize(uint32_t width, uint32_t height);
 
 	bool isFullscreen() const { return m_fullscreen; }
 	void setFullscreen(bool fullscreen);
@@ -45,10 +46,12 @@ public:
 private:
 	friend LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-	void registerWindowClass(HINSTANCE hInstance, const wchar_t* windowClassName, WNDPROC windowCallback);
+	void registerWindowClass(HINSTANCE hInstance, const wchar_t* windowClassName);
 	void createWindow(const wchar_t* windowClassName, HINSTANCE hInstance, const wchar_t* appName, uint32_t width, uint32_t height);
 
 private:
+	std::shared_ptr<SwapChain>		m_swapChain;
+
 	HWND							m_windowHandle = nullptr;
 	RECT							m_windowRect;
 
@@ -58,5 +61,5 @@ private:
 	uint32_t						m_width;
 	uint32_t						m_height;
 
-	std::shared_ptr<SwapChain>		m_swapChain;
+	EventListener*					m_listener;
 };

@@ -4,12 +4,13 @@ enum class EventType
 {
 	None = 0,
 
-	Paint,
+	WindowUpdate,
+	WindowSizeChange,
+	WindowDestroy,
+
 	SysKeyDown,
-	KeyDown,
 	SysChar,
-	Size,
-	Destroy
+	KeyDown
 };
 
 struct Event
@@ -25,6 +26,14 @@ struct KeyEvent : public Event
 	char key;
 
 	KeyEvent(const EventType& type, char key) : Event(type), key(key) {}
+};
+
+struct ResizeEvent : public Event
+{
+	uint32_t width;
+	uint32_t height;
+
+	ResizeEvent(uint32_t width, uint32_t height): Event(EventType::WindowSizeChange), width(width), height(height) {}
 };
 
 class EventListener

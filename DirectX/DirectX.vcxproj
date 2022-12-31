@@ -96,6 +96,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -116,6 +118,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -158,17 +162,20 @@
     <ClInclude Include="engine\inc\HighResolutionClock.h" />
     <ClInclude Include="engine\inc\KeyCodes.h" />
     <ClInclude Include="engine\inc\Window.h" />
+    <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\CommandQueue.h" />
     <ClInclude Include="src\dxpch.h" />
     <ClInclude Include="src\Event.h" />
     <ClInclude Include="external\Helpers.h" />
+    <ClInclude Include="src\Sandbox.h" />
     <ClInclude Include="src\SwapChain.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\CommandQueue.cpp" />
-    <ClCompile Include="src\DirectX.cpp" />
     <ClCompile Include="src\dxpch.cpp" />
+    <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\SwapChain.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>

@@ -63,7 +63,7 @@ void SwapChain::present()
 
 void SwapChain::resize(uint32_t width, uint32_t height)
 {
-    for (int i = 0; i < m_bufferCount; ++i)
+    for (uint32_t i = 0; i < m_bufferCount; ++i)
     {
         // Any references to the back buffers must be released
         // before the swap chain can be resized.
@@ -92,7 +92,7 @@ void SwapChain::updateRenterTargetViews()
 
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_RTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
-    for (int i = 0; i < m_bufferCount; ++i)
+    for (uint32_t i = 0; i < m_bufferCount; ++i)
     {
         ComPtr<ID3D12Resource> backBuffer;
         ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));

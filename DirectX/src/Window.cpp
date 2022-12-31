@@ -1,13 +1,16 @@
 #include "dxpch.h"
 #include "Window.h"
+#include "Application.h"
 
-Window::Window(const WindowSettings& settings, WNDPROC windowCallback, bool tearingSupported)
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+Window::Window(const WindowSettings& settings, EventListener* listener)
+    :   m_tearingSupported(settings.tearingSupported),
+        m_listener(listener)
 {
-    m_tearingSupported = tearingSupported;
-
     const wchar_t* windowClassName = L"DX12WindowClass";
 
-    registerWindowClass(settings.hInstance, windowClassName, windowCallback);
+    registerWindowClass(settings.hInstance, windowClassName);
     createWindow(windowClassName, settings.hInstance, settings.title, settings.width, settings.height);
 
     // Initialize the global window rect variable.
@@ -21,14 +24,8 @@ void Window::show()
     ::ShowWindow(m_windowHandle, SW_SHOW);
 }
 
-void Window::onResize()
+void Window::onResize(uint32_t width, uint32_t height)
 {
-    RECT clientRect = {};
-    ::GetClientRect(m_windowHandle, &m_windowRect);
-
-    uint32_t width = clientRect.right - clientRect.left;
-    uint32_t height = clientRect.bottom - clientRect.top;
-
     if (m_width != width || m_height != height)
     {
         // Don't allow 0 size swap chain back buffers.
@@ -96,14 +93,14 @@ void Window::setFullscreen(bool fullscreen)
     }
 }
 
-void Window::registerWindowClass(HINSTANCE hInstance, const wchar_t* windowClassName, WNDPROC windowCallback)
+void Window::registerWindowClass(HINSTANCE hInstance, const wchar_t* windowClassName)
 {
     // Register a window class for creating our render window with.
     WNDCLASSEXW windowClass = {};
 
     windowClass.cbSize = sizeof(WNDCLASSEX);
     windowClass.style = CS_HREDRAW | CS_VREDRAW;
-    windowClass.lpfnWndProc = windowCallback;
+    windowClass.lpfnWndProc = &WndProc;
     windowClass.cbClsExtra = 0;
     windowClass.cbWndExtra = 0;
     windowClass.hInstance = hInstance;
@@ -149,4 +146,65 @@ void Window::createWindow(const wchar_t* windowClassName, HINSTANCE hInstance, c
     );
 
     assert(m_windowHandle && "Failed to create window");
+}
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    auto window = Application::Get()->getWindow();
+    if (window == nullptr)
+    {
+        return ::DefWindowProcW(hwnd, message, wParam, lParam);
+    }
+
+    auto listener = window->m_listener;
+
+    switch (message)
+    {
+    case WM_PAINT:
+    {
+        Event e(EventType::WindowUpdate);
+        listener->onEvent(e);
+        break;
+    }
+    case WM_SYSKEYDOWN:
+    {
+        KeyEvent e(EventType::SysKeyDown, (char) wParam);
+        listener->onEvent(e);
+        break;
+    }
+    case WM_KEYDOWN:
+    {
+        KeyEvent e(EventType::KeyDown, (char)wParam);
+        listener->onEvent(e);
+        break;
+    }
+    case WM_SYSCHAR:
+    {
+        Event e(EventType::SysChar);
+        listener->onEvent(e);
+        break;
+    }
+    case WM_SIZE:
+    {
+        RECT clientRect = {};
+        ::GetClientRect(window->getWindowHandle(), &clientRect);
+
+        uint32_t width = clientRect.right - clientRect.left;
+        uint32_t height = clientRect.bottom - clientRect.top;
+
+        ResizeEvent e(width, height);
+        listener->onEvent(e);
+        break;
+    }
+    case WM_DESTROY:
+    {
+        Event e(EventType::WindowDestroy);
+        listener->onEvent(e);
+        break;
+    }
+    default:
+        return ::DefWindowProcW(hwnd, message, wParam, lParam);
+    }
+
+    return 0;
 }
