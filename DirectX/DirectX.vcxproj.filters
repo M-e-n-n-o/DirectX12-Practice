@@ -69,7 +69,13 @@
     <ClInclude Include="src\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Sandbox.h">
+    <ClInclude Include="src\app\Tutorial1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\app\Tutorial2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

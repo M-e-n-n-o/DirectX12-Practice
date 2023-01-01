@@ -163,11 +163,13 @@
     <ClInclude Include="engine\inc\KeyCodes.h" />
     <ClInclude Include="engine\inc\Window.h" />
     <ClInclude Include="src\Application.h" />
+    <ClInclude Include="src\app\Tutorial2.h" />
     <ClInclude Include="src\CommandQueue.h" />
     <ClInclude Include="src\dxpch.h" />
     <ClInclude Include="src\Event.h" />
     <ClInclude Include="external\Helpers.h" />
-    <ClInclude Include="src\Sandbox.h" />
+    <ClInclude Include="src\app\Tutorial1.h" />
+    <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\SwapChain.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>

@@ -3,7 +3,8 @@
 
 Application* Application::s_instance = nullptr;
 
-Application::Application(const WindowSettings& windowSettings)
+Application::Application(const WindowSettings& windowSettings, Game* game)
+	:	m_game(game)
 {
 	if (s_instance == nullptr)
 	{
@@ -20,16 +21,10 @@ Application::Application(const WindowSettings& windowSettings)
 	// be rendered in a DPI sensitive fashion.
 	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
-	m_window = std::make_shared<Window>(windowSettings, this);
-
 	ComPtr<IDXGIAdapter4> adapter = getAdapter(USE_WARP_ADAPTER);
 	m_device = createDevice(adapter);
 
-	m_commandQueue = std::make_shared<CommandQueue>(m_device, D3D12_COMMAND_LIST_TYPE_DIRECT);
-
-	auto swapChain = std::make_shared<SwapChain>(m_device, m_commandQueue->getCommandQueue(), windowSettings.width, windowSettings.height,
-		SWAPCHAIN_BUFFER_COUNT, m_window->getWindowHandle(), windowSettings.tearingSupported);
-	m_window->setSwapChain(swapChain);
+	m_window = m_game->Initialize(windowSettings);
 }
 
 Application::~Application()
@@ -55,17 +50,17 @@ void Application::run()
 
 	m_isRunning = false;
 
-	m_commandQueue->flush();
+	m_game->Destory();
 }
 
 void Application::update()
 {
-	onUpdate();
+	m_game->onUpdate();
 }
 
 void Application::render()
 {
-	onRender();
+	m_game->onRender();
 }
 
 void Application::onEvent(Event& event)
@@ -85,9 +80,8 @@ void Application::onEvent(Event& event)
 	}
 	case EventType::WindowSizeChange:
 	{
-		m_commandQueue->flush();
-
 		ResizeEvent& resizeEvent = static_cast<ResizeEvent&>(event);
+		m_game->onResize(resizeEvent);
 		m_window->onResize(resizeEvent.width, resizeEvent.height);
 		break;
 	}
@@ -100,6 +94,7 @@ void Application::onEvent(Event& event)
 	case EventType::KeyDown:
 	{
 		KeyEvent& keyEvent = static_cast<KeyEvent&>(event);
+		m_game->onKeyPressed(keyEvent);
 
 		switch (keyEvent.key)
 		{

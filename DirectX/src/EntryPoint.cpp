@@ -2,7 +2,7 @@
 
 #include <dxgidebug.h>
 
-#include "Sandbox.h"
+#include "app/Tutorial1.h"
 
 void EnableDebugLayer()
 {
@@ -63,11 +63,13 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdL
     settings.tearingSupported = CheckTearingSupport();
     settings.hInstance = hInstance;
 
-    Application* app = new Sandbox(settings);
+    Game* game = new Tutorial1();
+    Application* app = new Application(settings, game);
     app->run();
     delete app;
+    delete game;
 
-    //atexit(&ReportLiveObjects);
+    atexit(&ReportLiveObjects);
 
     return 0;
 }

@@ -9,16 +9,14 @@
 // Own Headers
 #include "Event.h"
 #include "Window.h"
-#include "CommandQueue.h"
-#include "SwapChain.h"
+#include "Game.h"
 
 #define USE_WARP_ADAPTER 0
-#define SWAPCHAIN_BUFFER_COUNT 3
 
 class Application : public EventListener
 {
 public:
-	Application(const WindowSettings& windowSettings);
+	Application(const WindowSettings& windowSettings, Game* game);
 	virtual ~Application();
 
 	void run();
@@ -27,14 +25,13 @@ public:
 
 	std::shared_ptr<Window> getWindow() const { return m_window; }
 
+	Microsoft::WRL::ComPtr<ID3D12Device2> getDevice() const { return m_device; }
+
 	static Application* Get() { return s_instance; }
 
 private:
 	void update();
 	void render();
-
-	virtual void onUpdate() = 0;
-	virtual void onRender() = 0;
 
 	Microsoft::WRL::ComPtr<IDXGIAdapter4> getAdapter(bool useWarp);
 	Microsoft::WRL::ComPtr<ID3D12Device2> createDevice(Microsoft::WRL::ComPtr<IDXGIAdapter4> adapter);
@@ -42,10 +39,11 @@ private:
 protected:
 	bool									m_isRunning = false;
 
+	Game*									m_game;
+
 	Microsoft::WRL::ComPtr<ID3D12Device2>	m_device;
 
 	std::shared_ptr<Window>					m_window;
-	std::shared_ptr<CommandQueue>			m_commandQueue;
 
 private:
 	static Application*						s_instance;

@@ -4,22 +4,43 @@
 
 #include <chrono>
 #include "Application.h"
+#include "CommandQueue.h"
+#include "SwapChain.h"
 
-class Sandbox : public Application
+#define SWAPCHAIN_BUFFER_COUNT 3
+
+class Tutorial1 : public Game
 {
 private:
     uint64_t frameFenceValues[SWAPCHAIN_BUFFER_COUNT] = {};
 
+    std::shared_ptr<Window> window;
+    std::shared_ptr<SwapChain> swapChain;
+    std::shared_ptr<CommandQueue> commandQueue;
+
 public:
-	Sandbox(const WindowSettings& windowSettings): Application(windowSettings)
-	{
+    Tutorial1() = default;
+    ~Tutorial1() = default;
 
-	}
+    std::shared_ptr<Window> Initialize(const WindowSettings& settings) override
+    {
+        auto device = Application::Get()->getDevice();
 
-	~Sandbox()
-	{
+        window = std::make_shared<Window>(settings, Application::Get());
 
-	}
+        commandQueue = std::make_shared<CommandQueue>(device, D3D12_COMMAND_LIST_TYPE_DIRECT);
+
+        swapChain = std::make_shared<SwapChain>(device, commandQueue->getCommandQueue(), settings.width, settings.height,
+            SWAPCHAIN_BUFFER_COUNT, window->getWindowHandle(), settings.tearingSupported);
+        window->setSwapChain(swapChain);
+
+        return window;
+    }
+
+    void Destory() override
+    {
+        commandQueue->flush();
+    }
 
 	void onUpdate() override
 	{
@@ -51,9 +72,8 @@ public:
 
 	void onRender() override
 	{
-        auto swapChain = m_window->getSwapChain();
         auto backBuffer = swapChain->getCurrentBackBuffer();
-        auto commandList = m_commandQueue->getCommandList();
+        auto commandList = commandQueue->getCommandList();
 
         // Clear the render target.
         {
@@ -75,13 +95,29 @@ public:
                 D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
             commandList->ResourceBarrier(1, &barrier);
 
-            m_commandQueue->executeCommandList(commandList);
+            commandQueue->executeCommandList(commandList);
 
             swapChain->present();
 
             // Wait until the new backbuffer is ready to be used
-            frameFenceValues[swapChain->getCurrentBackBufferIndex()] = m_commandQueue->signal();
-            m_commandQueue->waitForFenceValue(frameFenceValues[swapChain->getCurrentBackBufferIndex()]);
+            frameFenceValues[swapChain->getCurrentBackBufferIndex()] = commandQueue->signal();
+            commandQueue->waitForFenceValue(frameFenceValues[swapChain->getCurrentBackBufferIndex()]);
         }
 	}
+
+    void onKeyPressed(KeyEvent& event) override
+    {
+
+    }
+
+    void onResize(ResizeEvent& event) override
+    {
+        commandQueue->flush();
+
+        uint32_t currentBackBufferIndex = swapChain->getCurrentBackBufferIndex();
+        for (int i = 0; i < SWAPCHAIN_BUFFER_COUNT; i++)
+        {
+            frameFenceValues[i] = frameFenceValues[currentBackBufferIndex];
+        }
+    }
 };
