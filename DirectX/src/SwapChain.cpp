@@ -53,12 +53,14 @@ SwapChain::SwapChain(Microsoft::WRL::ComPtr<ID3D12Device2> device, Microsoft::WR
     updateRenterTargetViews();
 }
 
-void SwapChain::present()
+uint32_t SwapChain::present()
 {
     UINT syncInterval = m_vSync ? 1 : 0;
     UINT presentFlags = m_isTearingSupported && !m_vSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
     ThrowIfFailed(m_swapChain->Present(syncInterval, presentFlags));
     m_currentBackBufferIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+    return m_currentBackBufferIndex;
 }
 
 void SwapChain::resize(uint32_t width, uint32_t height)

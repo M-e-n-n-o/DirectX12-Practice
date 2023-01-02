@@ -98,5 +98,12 @@
     <ClCompile Include="src\EntryPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\app\Tutorial2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="res\PixelShader.hlsl" />
+    <FxCompile Include="res\VertexShader.hlsl" />
   </ItemGroup>
 </Project>

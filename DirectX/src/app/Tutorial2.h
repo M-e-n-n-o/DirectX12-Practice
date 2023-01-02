@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include "Application.h"
+#include "SwapChain.h"
 #include "CommandQueue.h"
 
 #define SWAPCHAIN_BUFFER_COUNT 3
@@ -17,7 +18,7 @@ public:
     std::shared_ptr<Window> Initialize(const WindowSettings& settings) override;
     void Destory() override;
 
-    void onUpdate() override;
+    void onUpdate(float delta) override;
     void onRender() override;
 
     void onKeyPressed(KeyEvent& event) override;
@@ -28,14 +29,6 @@ private:
     void transitionResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
         Microsoft::WRL::ComPtr<ID3D12Resource> resource,
         D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState);
-
-    // Clear a render target view.
-    void clearRTV(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
-        D3D12_CPU_DESCRIPTOR_HANDLE rtv, FLOAT* clearColor);
-
-    // Clear the depth of a depth-stencil view.
-    void clearDepth(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
-        D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth = 1.0f);
 
     // Create a GPU buffer.
     void updateBufferResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
@@ -50,5 +43,35 @@ private:
     uint64_t frameFenceValues[SWAPCHAIN_BUFFER_COUNT] = {};
 
     std::shared_ptr<Window> window;
-    std::shared_ptr<CommandQueue> commandQueue;
+    std::shared_ptr<SwapChain> swapChain;
+    std::shared_ptr<CommandQueue> commandQueueCopy;
+    std::shared_ptr<CommandQueue> commandQueueDirect;
+
+    // Vertex buffer cube
+    Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer;
+    D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+    // Index buffer cube
+    Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer;
+    D3D12_INDEX_BUFFER_VIEW indexBufferView;
+
+    // Depth buffer
+    Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer;
+    // Descriptor heap depth buffer
+    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;
+
+    // Root signature
+    Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
+    // Pipeline state object.
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
+    // Used to initialize the raterizer stage of the pipeline
+    D3D12_VIEWPORT viewport;
+    D3D12_RECT scissorRect;
+
+    float fov;
+
+    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
+    DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixIdentity();
+    DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixIdentity();
+
+    bool contentLoaded;
 };

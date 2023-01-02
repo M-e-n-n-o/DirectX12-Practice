@@ -2,7 +2,8 @@
 
 #include <dxgidebug.h>
 
-#include "app/Tutorial1.h"
+//#include "app/Tutorial1.h"
+#include "app/Tutorial2.h"
 
 void EnableDebugLayer()
 {
@@ -63,7 +64,7 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdL
     settings.tearingSupported = CheckTearingSupport();
     settings.hInstance = hInstance;
 
-    Game* game = new Tutorial1();
+    Game* game = new Tutorial2();
     Application* app = new Application(settings, game);
     app->run();
     delete app;

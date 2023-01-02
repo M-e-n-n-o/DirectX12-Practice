@@ -17,7 +17,7 @@ public:
 		uint32_t width, uint32_t height, uint32_t bufferCount, HWND windowHandle, bool tearingSupported);
 	~SwapChain() = default;
 
-	void present();
+	uint32_t present();
 
 	void resize(uint32_t width, uint32_t height);
 

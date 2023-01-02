@@ -35,6 +35,9 @@ public:
 
 	void onResize(uint32_t width, uint32_t height);
 
+	uint32_t getWidth() { return m_width; }
+	uint32_t getHeight() { return m_height; }
+
 	bool isFullscreen() const { return m_fullscreen; }
 	void setFullscreen(bool fullscreen);
 
