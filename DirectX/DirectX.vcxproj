@@ -171,6 +171,7 @@
     <ClInclude Include="src\app\Tutorial1.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\SwapChain.h" />
+    <ClInclude Include="src\VertexArray.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
@@ -180,6 +181,7 @@
     <ClCompile Include="src\dxpch.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\SwapChain.cpp" />
+    <ClCompile Include="src\VertexArray.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>

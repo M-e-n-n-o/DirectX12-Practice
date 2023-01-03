@@ -6,6 +6,7 @@
 #include "Application.h"
 #include "SwapChain.h"
 #include "CommandQueue.h"
+#include "VertexArray.h"
 
 #define SWAPCHAIN_BUFFER_COUNT 3
 
@@ -48,13 +49,15 @@ private:
     std::shared_ptr<CommandQueue> commandQueueDirect;
 
     // Vertex buffer cube
-    Microsoft::WRL::ComPtr<ID3D12Resource> vertexPosBuffer;
-    D3D12_VERTEX_BUFFER_VIEW vertexPosBufferView;
-    Microsoft::WRL::ComPtr<ID3D12Resource> vertexColorBuffer;
-    D3D12_VERTEX_BUFFER_VIEW vertexColorBufferView;
-    // Index buffer cube
-    Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer;
-    D3D12_INDEX_BUFFER_VIEW indexBufferView;
+    std::shared_ptr<VertexArray> vao;
+
+    //Microsoft::WRL::ComPtr<ID3D12Resource> vertexPosBuffer;
+    //D3D12_VERTEX_BUFFER_VIEW vertexPosBufferView;
+    //Microsoft::WRL::ComPtr<ID3D12Resource> vertexColorBuffer;
+    //D3D12_VERTEX_BUFFER_VIEW vertexColorBufferView;
+    //// Index buffer cube
+    //Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer;
+    //D3D12_INDEX_BUFFER_VIEW indexBufferView;
 
     // Depth buffer
     Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer;

@@ -13,22 +13,22 @@ constexpr const T& clamp(const T& val, const T& min, const T& max)
 }
 
 // Vertex data for a colored cube.
-//struct VertexPosColor
-//{
-//    XMFLOAT3 Position;
-//    XMFLOAT3 Color;
-//};
+struct VertexPosColor
+{
+    XMFLOAT3 Position;
+    XMFLOAT3 Color;
+};
 
-//static VertexPosColor g_Vertices[8] = {
-//    { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f) }, // 0
-//    { XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) }, // 1
-//    { XMFLOAT3(1.0f,  1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 0.0f) }, // 2
-//    { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) }, // 3
-//    { XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) }, // 4
-//    { XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT3(0.0f, 1.0f, 1.0f) }, // 5
-//    { XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f) }, // 6
-//    { XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT3(1.0f, 0.0f, 1.0f) }  // 7
-//};
+static VertexPosColor g_Vertices[8] = {
+    { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f) }, // 0
+    { XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) }, // 1
+    { XMFLOAT3(1.0f,  1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 0.0f) }, // 2
+    { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) }, // 3
+    { XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) }, // 4
+    { XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT3(0.0f, 1.0f, 1.0f) }, // 5
+    { XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f) }, // 6
+    { XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT3(1.0f, 0.0f, 1.0f) }  // 7
+};
 
 static XMFLOAT3 g_VerticesPos[8] = {
     XMFLOAT3(-1.0f, -1.0f, -1.0f),
@@ -80,30 +80,50 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
         SWAPCHAIN_BUFFER_COUNT, window->getWindowHandle(), settings.tearingSupported);
     window->setSwapChain(swapChain);
 
-    auto commandList = commandQueueCopy->getCommandList();
+    // auto commandList = commandQueueCopy->getCommandList();
 
     // Upload vertex buffer data
-    ComPtr<ID3D12Resource> intermediateVertexBufferPos;
-    updateBufferResource(commandList.Get(), &vertexPosBuffer, &intermediateVertexBufferPos, _countof(g_VerticesPos), sizeof(XMFLOAT3), g_VerticesPos);
-    // Create the vertex buffer view (tells the input assembler where the vertices are stored in GPU memory)
-    vertexPosBufferView.BufferLocation = vertexPosBuffer->GetGPUVirtualAddress();
-    vertexPosBufferView.SizeInBytes = sizeof(g_VerticesPos);
-    vertexPosBufferView.StrideInBytes = sizeof(XMFLOAT3);
+    vao = std::make_shared<VertexArray>();
 
-    ComPtr<ID3D12Resource> intermediateVertexBufferColor;
-    updateBufferResource(commandList.Get(), &vertexColorBuffer, &intermediateVertexBufferColor, _countof(g_VerticesColor), sizeof(XMFLOAT3), g_VerticesColor);
-    // Create the vertex buffer view (tells the input assembler where the vertices are stored in GPU memory)
-    vertexColorBufferView.BufferLocation = vertexColorBuffer->GetGPUVirtualAddress();
-    vertexColorBufferView.SizeInBytes = sizeof(g_VerticesColor);
-    vertexColorBufferView.StrideInBytes = sizeof(XMFLOAT3);
+    //auto vbo = std::make_shared<VertexBuffer>(_countof(g_Vertices), sizeof(VertexPosColor), g_Vertices);
+    //std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = vao->setVertexBuffers({
+    //    { vbo, { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT }, { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT } } }
+    //});
 
-    // Upload index buffer data
-    ComPtr<ID3D12Resource> intermediateIndexBuffer;
-    updateBufferResource(commandList.Get(), &indexBuffer, &intermediateIndexBuffer, _countof(g_Indicies), sizeof(WORD), g_Indicies);
-    // Create index buffer view
-    indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
-    indexBufferView.SizeInBytes = sizeof(g_Indicies);
-    indexBufferView.Format = DXGI_FORMAT_R16_UINT;
+    auto vboPos = std::make_shared<VertexBuffer>(_countof(g_VerticesPos), sizeof(XMFLOAT3), g_VerticesPos);
+    auto vboColor = std::make_shared<VertexBuffer>(_countof(g_VerticesColor), sizeof(XMFLOAT3), g_VerticesColor);
+    std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = vao->setVertexBuffers({
+        { vboPos, { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT } } },
+        { vboColor, { { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT } } }
+    });
+
+    auto ibo = std::make_shared<IndexBuffer>(_countof(g_Indicies), sizeof(WORD), g_Indicies);
+    vao->setIndexBuffer(ibo);
+
+    vao->uploadDataToGPU(commandQueueCopy);
+
+
+    //ComPtr<ID3D12Resource> intermediateVertexBufferPos;
+    //updateBufferResource(commandList.Get(), &vertexPosBuffer, &intermediateVertexBufferPos, _countof(g_VerticesPos), sizeof(XMFLOAT3), g_VerticesPos);
+    //// Create the vertex buffer view (tells the input assembler where the vertices are stored in GPU memory)
+    //vertexPosBufferView.BufferLocation = vertexPosBuffer->GetGPUVirtualAddress();
+    //vertexPosBufferView.SizeInBytes = sizeof(g_VerticesPos);
+    //vertexPosBufferView.StrideInBytes = sizeof(XMFLOAT3);
+
+    //ComPtr<ID3D12Resource> intermediateVertexBufferColor;
+    //updateBufferResource(commandList.Get(), &vertexColorBuffer, &intermediateVertexBufferColor, _countof(g_VerticesColor), sizeof(XMFLOAT3), g_VerticesColor);
+    //// Create the vertex buffer view (tells the input assembler where the vertices are stored in GPU memory)
+    //vertexColorBufferView.BufferLocation = vertexColorBuffer->GetGPUVirtualAddress();
+    //vertexColorBufferView.SizeInBytes = sizeof(g_VerticesColor);
+    //vertexColorBufferView.StrideInBytes = sizeof(XMFLOAT3);
+
+    //// Upload index buffer data
+    //ComPtr<ID3D12Resource> intermediateIndexBuffer;
+    //updateBufferResource(commandList.Get(), &indexBuffer, &intermediateIndexBuffer, _countof(g_Indicies), sizeof(WORD), g_Indicies);
+    //// Create index buffer view
+    //indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
+    //indexBufferView.SizeInBytes = sizeof(g_Indicies);
+    //indexBufferView.Format = DXGI_FORMAT_R16_UINT;
 
     // Create the descriptor heap for the depth-stencil view
     D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
@@ -120,10 +140,10 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
     ThrowIfFailed(D3DReadFileToBlob(L"PixelShader.cso", &pixelShaderBlob));
 
     // Create the vertex input layout
-    D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-    };
+    //D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+    //    { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+    //    { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+    //};
 
     // Create a root signature
     D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData{};
@@ -173,7 +193,8 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
 
     // Describe PipeLine State Object using a user defined struct
     pipelineStateStream.pRootSignature = rootSignature.Get();
-    pipelineStateStream.InputLayout = { inputLayout, _countof(inputLayout) };
+    //pipelineStateStream.InputLayout = { inputLayout, _countof(inputLayout) };
+    pipelineStateStream.InputLayout = { &inputLayout[0], inputLayout.size() };
     pipelineStateStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     pipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
     pipelineStateStream.PS = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
@@ -186,9 +207,9 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
     };
     ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&pipelineState)));
 
-    // Upload the vertex and index buffers to the GPU resources
-    auto fenceValue = commandQueueCopy->executeCommandList(commandList);
-    commandQueueCopy->waitForFenceValue(fenceValue);
+    //// Upload the vertex and index buffers to the GPU resources
+    //auto fenceValue = commandQueueCopy->executeCommandList(commandList);
+    //commandQueueCopy->waitForFenceValue(fenceValue);
 
     contentLoaded = true;
 
@@ -258,12 +279,14 @@ void Tutorial2::onRender()
 
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    D3D12_VERTEX_BUFFER_VIEW* views = (D3D12_VERTEX_BUFFER_VIEW*) malloc(sizeof(D3D12_VERTEX_BUFFER_VIEW) * 2);
-    views[0] = vertexPosBufferView;
-    views[1] = vertexColorBufferView;
+    //D3D12_VERTEX_BUFFER_VIEW* views = (D3D12_VERTEX_BUFFER_VIEW*) malloc(sizeof(D3D12_VERTEX_BUFFER_VIEW) * 2);
+    //views[0] = vertexPosBufferView;
+    //views[1] = vertexColorBufferView;
 
-    commandList->IASetVertexBuffers(0, 2, views);
-    commandList->IASetIndexBuffer(&indexBufferView);
+    //commandList->IASetVertexBuffers(0, 2, views);
+    //commandList->IASetIndexBuffer(&indexBufferView);
+
+    vao->bind(commandList);
 
     commandList->RSSetViewports(1, &viewport);
     commandList->RSSetScissorRects(1, &scissorRect);
@@ -293,7 +316,7 @@ void Tutorial2::onRender()
         commandQueueDirect->waitForFenceValue(frameFenceValues[currentBackBufferIndex]);
     }
 
-    free(views);
+    //free(views);
 }
 
 void Tutorial2::onKeyPressed(KeyEvent& event)
