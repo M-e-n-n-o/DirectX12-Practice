@@ -48,8 +48,10 @@ private:
     std::shared_ptr<CommandQueue> commandQueueDirect;
 
     // Vertex buffer cube
-    Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer;
-    D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+    Microsoft::WRL::ComPtr<ID3D12Resource> vertexPosBuffer;
+    D3D12_VERTEX_BUFFER_VIEW vertexPosBufferView;
+    Microsoft::WRL::ComPtr<ID3D12Resource> vertexColorBuffer;
+    D3D12_VERTEX_BUFFER_VIEW vertexColorBufferView;
     // Index buffer cube
     Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer;
     D3D12_INDEX_BUFFER_VIEW indexBufferView;

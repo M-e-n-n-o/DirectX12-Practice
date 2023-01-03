@@ -13,21 +13,43 @@ constexpr const T& clamp(const T& val, const T& min, const T& max)
 }
 
 // Vertex data for a colored cube.
-struct VertexPosColor
-{
-    XMFLOAT3 Position;
-    XMFLOAT3 Color;
+//struct VertexPosColor
+//{
+//    XMFLOAT3 Position;
+//    XMFLOAT3 Color;
+//};
+
+//static VertexPosColor g_Vertices[8] = {
+//    { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f) }, // 0
+//    { XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) }, // 1
+//    { XMFLOAT3(1.0f,  1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 0.0f) }, // 2
+//    { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) }, // 3
+//    { XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) }, // 4
+//    { XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT3(0.0f, 1.0f, 1.0f) }, // 5
+//    { XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f) }, // 6
+//    { XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT3(1.0f, 0.0f, 1.0f) }  // 7
+//};
+
+static XMFLOAT3 g_VerticesPos[8] = {
+    XMFLOAT3(-1.0f, -1.0f, -1.0f),
+    XMFLOAT3(-1.0f,  1.0f, -1.0f),
+    XMFLOAT3(1.0f,  1.0f, -1.0f),
+    XMFLOAT3(1.0f, -1.0f, -1.0f),
+    XMFLOAT3(-1.0f, -1.0f,  1.0f),
+    XMFLOAT3(-1.0f,  1.0f,  1.0f),
+    XMFLOAT3(1.0f,  1.0f,  1.0f),
+    XMFLOAT3(1.0f, -1.0f,  1.0f)
 };
 
-static VertexPosColor g_Vertices[8] = {
-    { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f) }, // 0
-    { XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) }, // 1
-    { XMFLOAT3(1.0f,  1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 0.0f) }, // 2
-    { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) }, // 3
-    { XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) }, // 4
-    { XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT3(0.0f, 1.0f, 1.0f) }, // 5
-    { XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f) }, // 6
-    { XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT3(1.0f, 0.0f, 1.0f) }  // 7
+static XMFLOAT3 g_VerticesColor[8] = {
+     XMFLOAT3(0.0f, 0.0f, 0.0f),
+     XMFLOAT3(0.0f, 1.0f, 0.0f),
+     XMFLOAT3(1.0f, 1.0f, 0.0f),
+     XMFLOAT3(1.0f, 0.0f, 0.0f),
+     XMFLOAT3(0.0f, 0.0f, 1.0f),
+     XMFLOAT3(0.0f, 1.0f, 1.0f),
+     XMFLOAT3(1.0f, 1.0f, 1.0f),
+     XMFLOAT3(1.0f, 0.0f, 1.0f)
 };
 
 static WORD g_Indicies[36] =
@@ -61,12 +83,19 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
     auto commandList = commandQueueCopy->getCommandList();
 
     // Upload vertex buffer data
-    ComPtr<ID3D12Resource> intermediateVertexBuffer;
-    updateBufferResource(commandList.Get(), &vertexBuffer, &intermediateVertexBuffer, _countof(g_Vertices), sizeof(VertexPosColor), g_Vertices);
+    ComPtr<ID3D12Resource> intermediateVertexBufferPos;
+    updateBufferResource(commandList.Get(), &vertexPosBuffer, &intermediateVertexBufferPos, _countof(g_VerticesPos), sizeof(XMFLOAT3), g_VerticesPos);
     // Create the vertex buffer view (tells the input assembler where the vertices are stored in GPU memory)
-    vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
-    vertexBufferView.SizeInBytes = sizeof(g_Vertices);
-    vertexBufferView.StrideInBytes = sizeof(VertexPosColor);
+    vertexPosBufferView.BufferLocation = vertexPosBuffer->GetGPUVirtualAddress();
+    vertexPosBufferView.SizeInBytes = sizeof(g_VerticesPos);
+    vertexPosBufferView.StrideInBytes = sizeof(XMFLOAT3);
+
+    ComPtr<ID3D12Resource> intermediateVertexBufferColor;
+    updateBufferResource(commandList.Get(), &vertexColorBuffer, &intermediateVertexBufferColor, _countof(g_VerticesColor), sizeof(XMFLOAT3), g_VerticesColor);
+    // Create the vertex buffer view (tells the input assembler where the vertices are stored in GPU memory)
+    vertexColorBufferView.BufferLocation = vertexColorBuffer->GetGPUVirtualAddress();
+    vertexColorBufferView.SizeInBytes = sizeof(g_VerticesColor);
+    vertexColorBufferView.StrideInBytes = sizeof(XMFLOAT3);
 
     // Upload index buffer data
     ComPtr<ID3D12Resource> intermediateIndexBuffer;
@@ -93,7 +122,7 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
     // Create the vertex input layout
     D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
     };
 
     // Create a root signature
@@ -228,7 +257,12 @@ void Tutorial2::onRender()
     commandList->SetGraphicsRootSignature(rootSignature.Get());
 
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+    D3D12_VERTEX_BUFFER_VIEW* views = (D3D12_VERTEX_BUFFER_VIEW*) malloc(sizeof(D3D12_VERTEX_BUFFER_VIEW) * 2);
+    views[0] = vertexPosBufferView;
+    views[1] = vertexColorBufferView;
+
+    commandList->IASetVertexBuffers(0, 2, views);
     commandList->IASetIndexBuffer(&indexBufferView);
 
     commandList->RSSetViewports(1, &viewport);
@@ -237,11 +271,15 @@ void Tutorial2::onRender()
     commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 
     // Update the MVP matrix
-    XMMATRIX mvpMatrix = XMMatrixMultiply(modelMatrix, viewMatrix);
-    mvpMatrix = XMMatrixMultiply(mvpMatrix, projectionMatrix);
-    commandList->SetGraphicsRoot32BitConstants(0, sizeof(XMMATRIX) / 4, &mvpMatrix, 0);
+    for (int i = -20; i <= 20; i += 5)
+    {
+        auto m = modelMatrix * XMMatrixTranslation(i, 0, 30);
+        XMMATRIX mvpMatrix = XMMatrixMultiply(m, viewMatrix);
+        mvpMatrix = XMMatrixMultiply(mvpMatrix, projectionMatrix);
+        commandList->SetGraphicsRoot32BitConstants(0, sizeof(XMMATRIX) / 4, &mvpMatrix, 0);
 
-    commandList->DrawIndexedInstanced(_countof(g_Indicies), 1, 0, 0, 0);
+        commandList->DrawIndexedInstanced(_countof(g_Indicies), 1, 0, 0, 0);
+    }
 
     // Present
     {
@@ -254,6 +292,8 @@ void Tutorial2::onRender()
         // Wait until the new backbuffer is ready to be used
         commandQueueDirect->waitForFenceValue(frameFenceValues[currentBackBufferIndex]);
     }
+
+    free(views);
 }
 
 void Tutorial2::onKeyPressed(KeyEvent& event)
