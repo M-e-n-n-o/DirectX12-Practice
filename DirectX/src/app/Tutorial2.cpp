@@ -85,11 +85,6 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
     // Upload vertex buffer data
     vao = std::make_shared<VertexArray>();
 
-    //auto vbo = std::make_shared<VertexBuffer>(_countof(g_Vertices), sizeof(VertexPosColor), g_Vertices);
-    //std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = vao->setVertexBuffers({
-    //    { vbo, { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT }, { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT } } }
-    //});
-
     auto vboPos = std::make_shared<VertexBuffer>(_countof(g_VerticesPos), sizeof(XMFLOAT3), g_VerticesPos);
     auto vboColor = std::make_shared<VertexBuffer>(_countof(g_VerticesColor), sizeof(XMFLOAT3), g_VerticesColor);
     std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = vao->setVertexBuffers({
