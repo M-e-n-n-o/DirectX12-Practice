@@ -87,6 +87,15 @@
     <ClInclude Include="src\Defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\DescriptorAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DescriptorAllocation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DescriptorAllocatorPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Window.cpp">
@@ -114,6 +123,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\UploadBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DescriptorAllocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DescriptorAllocatorPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
