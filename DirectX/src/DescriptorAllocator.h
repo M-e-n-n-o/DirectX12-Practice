@@ -13,7 +13,6 @@
 class DescriptorAllocatorPage;
 
 // https://learn.microsoft.com/en-us/windows/win32/direct3d12/resource-binding-flow-of-control
-
 class DescriptorAllocator
 {
 public:

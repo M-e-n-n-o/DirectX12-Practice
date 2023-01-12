@@ -34,6 +34,8 @@ Application::~Application()
 
 void Application::run()
 {
+	m_frameCount = 0;
+
 	m_isRunning = true;
 
 	m_window->show();
@@ -86,6 +88,7 @@ void Application::update()
 void Application::render()
 {
 	m_game->onRender();
+	m_frameCount++;
 }
 
 void Application::onEvent(Event& event)

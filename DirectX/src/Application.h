@@ -27,6 +27,8 @@ public:
 
 	Microsoft::WRL::ComPtr<ID3D12Device2> getDevice() const { return m_device; }
 
+	uint64_t getFrameCount() const { return m_frameCount; }
+
 	static Application* Get() { return s_instance; }
 
 private:
@@ -44,6 +46,8 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Device2>	m_device;
 
 	std::shared_ptr<Window>					m_window;
+
+	uint64_t								m_frameCount;
 
 private:
 	static Application*						s_instance;
