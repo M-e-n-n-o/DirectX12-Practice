@@ -7,6 +7,9 @@
 
 class DescriptorAllocatorPage;
 
+/*
+* Descriptor table wrapper class
+*/
 class DescriptorAllocation
 {
 public:

@@ -10,6 +10,9 @@
 
 #include "DescriptorAllocation.h"
 
+/*
+* Descriptor Heap wrapper class
+*/
 class DescriptorAllocatorPage : public std::enable_shared_from_this<DescriptorAllocatorPage>
 {
 public:

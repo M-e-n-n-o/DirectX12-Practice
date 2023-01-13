@@ -7,6 +7,11 @@
 #include "SwapChain.h"
 #include "CommandQueue.h"
 #include "VertexArray.h"
+#include "RootSignature.h"
+#include "DescriptorAllocator.h"
+#include "DynamicDescriptorHeap.h"
+#include "UploadBuffer.h"
+#include "CommandList.h"
 
 #define SWAPCHAIN_BUFFER_COUNT 3
 
@@ -48,8 +53,18 @@ private:
     std::shared_ptr<CommandQueue> commandQueueCopy;
     std::shared_ptr<CommandQueue> commandQueueDirect;
 
+    // Descriptor heap depth buffer
+    std::shared_ptr<DescriptorAllocator> dsvDescAllocator;
+    DescriptorAllocation dsvTable;
+
+    std::shared_ptr<RootSignature> rootSignature;
+
     // Vertex buffer cube
     std::shared_ptr<VertexArray> vao;
+
+
+    std::shared_ptr<UploadBuffer> uploadBuffer;
+    //std::shared_ptr<DynamicDescriptorHeap> cbvDescriptorHeap;
 
     //Microsoft::WRL::ComPtr<ID3D12Resource> vertexPosBuffer;
     //D3D12_VERTEX_BUFFER_VIEW vertexPosBufferView;
@@ -62,10 +77,10 @@ private:
     // Depth buffer
     Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer;
     // Descriptor heap depth buffer
-    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;
+    //Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;
 
     // Root signature
-    Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
+    //Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
     // Pipeline state object.
     Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
     // Used to initialize the raterizer stage of the pipeline

@@ -80,7 +80,6 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
         SWAPCHAIN_BUFFER_COUNT, window->getWindowHandle(), settings.tearingSupported);
     window->setSwapChain(swapChain);
 
-    // auto commandList = commandQueueCopy->getCommandList();
 
     // Upload vertex buffer data
     vao = std::make_shared<VertexArray>();
@@ -98,47 +97,26 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
     vao->uploadDataToGPU(commandQueueCopy);
 
 
-    //ComPtr<ID3D12Resource> intermediateVertexBufferPos;
-    //updateBufferResource(commandList.Get(), &vertexPosBuffer, &intermediateVertexBufferPos, _countof(g_VerticesPos), sizeof(XMFLOAT3), g_VerticesPos);
-    //// Create the vertex buffer view (tells the input assembler where the vertices are stored in GPU memory)
-    //vertexPosBufferView.BufferLocation = vertexPosBuffer->GetGPUVirtualAddress();
-    //vertexPosBufferView.SizeInBytes = sizeof(g_VerticesPos);
-    //vertexPosBufferView.StrideInBytes = sizeof(XMFLOAT3);
-
-    //ComPtr<ID3D12Resource> intermediateVertexBufferColor;
-    //updateBufferResource(commandList.Get(), &vertexColorBuffer, &intermediateVertexBufferColor, _countof(g_VerticesColor), sizeof(XMFLOAT3), g_VerticesColor);
-    //// Create the vertex buffer view (tells the input assembler where the vertices are stored in GPU memory)
-    //vertexColorBufferView.BufferLocation = vertexColorBuffer->GetGPUVirtualAddress();
-    //vertexColorBufferView.SizeInBytes = sizeof(g_VerticesColor);
-    //vertexColorBufferView.StrideInBytes = sizeof(XMFLOAT3);
-
-    //// Upload index buffer data
-    //ComPtr<ID3D12Resource> intermediateIndexBuffer;
-    //updateBufferResource(commandList.Get(), &indexBuffer, &intermediateIndexBuffer, _countof(g_Indicies), sizeof(WORD), g_Indicies);
-    //// Create index buffer view
-    //indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
-    //indexBufferView.SizeInBytes = sizeof(g_Indicies);
-    //indexBufferView.Format = DXGI_FORMAT_R16_UINT;
-
-    // Create the descriptor heap for the depth-stencil view
-    D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
-    dsvHeapDesc.NumDescriptors = 1;
-    dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-    dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-    ThrowIfFailed(device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap)));
+#if defined(_DEBUG)
+    // Enable better shader debugging with the graphics debugging tools.
+    UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+    UINT compileFlags = 0;
+#endif
 
     // Load the vertex shader
     ComPtr<ID3DBlob> vertexShaderBlob;
     ThrowIfFailed(D3DReadFileToBlob(L"VertexShader.cso", &vertexShaderBlob));
+    //ThrowIfFailed(D3DCompileFromFile(L"Shader.hlsl", nullptr, nullptr, "VSMain", "vs_5_1", compileFlags, 0, &vertexShaderBlob, nullptr));
     // Load the pixel shader
     ComPtr<ID3DBlob> pixelShaderBlob;
     ThrowIfFailed(D3DReadFileToBlob(L"PixelShader.cso", &pixelShaderBlob));
+    //ThrowIfFailed(D3DCompileFromFile(L"Shader.hlsl", nullptr, nullptr, "PSMain", "ps_5_1", compileFlags, 0, &vertexShaderBlob, nullptr));
 
-    // Create the vertex input layout
-    //D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
-    //    { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-    //    { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-    //};
+    // Create the descriptor heap for the depth-stencil view
+    dsvDescAllocator = std::make_shared<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
+    dsvTable = dsvDescAllocator->allocate();
+
 
     // Create a root signature
     D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData{};
@@ -156,19 +134,24 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
         D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
         D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
 
-    // A single 32-bit constant root parameter that is used by the vertex shader
+
+    CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
     CD3DX12_ROOT_PARAMETER1 rootParameters[1];
-    rootParameters[0].InitAsConstants(sizeof(XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
-    
+    ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_NONE);
+    //rootParameters[0].InitAsConstants(sizeof(XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+    //rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);
+    rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX);
+
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
     rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, rootSignatureFlags);
 
-    // Serialize the root signature
-    ComPtr<ID3DBlob> rootSignatureBlob;
-    ComPtr<ID3DBlob> errorBlob;
-    ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &rootSignatureBlob, &errorBlob));
-    // Create the root signature
-    ThrowIfFailed(device->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
+    rootSignature = std::make_shared<RootSignature>();
+    rootSignature->setRootSignatureDesc(rootSignatureDesc.Desc_1_1, featureData.HighestVersion);
+
+    uploadBuffer = std::make_shared<UploadBuffer>();
+
+    //cbvDescriptorHeap = std::make_shared<DynamicDescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    //cbvDescriptorHeap->parseRootSignature(*rootSignature);
 
     struct PipelineStateStream
     {
@@ -187,8 +170,7 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
     rtvFormats.RTFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 
     // Describe PipeLine State Object using a user defined struct
-    pipelineStateStream.pRootSignature = rootSignature.Get();
-    //pipelineStateStream.InputLayout = { inputLayout, _countof(inputLayout) };
+    pipelineStateStream.pRootSignature = rootSignature->getRootSignature().Get();
     pipelineStateStream.InputLayout = { &inputLayout[0], inputLayout.size() };
     pipelineStateStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     pipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
@@ -201,10 +183,6 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
         sizeof(PipelineStateStream), &pipelineStateStream
     };
     ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&pipelineState)));
-
-    //// Upload the vertex and index buffers to the GPU resources
-    //auto fenceValue = commandQueueCopy->executeCommandList(commandList);
-    //commandQueueCopy->waitForFenceValue(fenceValue);
 
     contentLoaded = true;
 
@@ -257,7 +235,7 @@ void Tutorial2::onRender()
     UINT currentBackBufferIndex = swapChain->getCurrentBackBufferIndex();
     auto backBuffer = swapChain->getCurrentBackBuffer();
     auto rtv = swapChain->getCurrentRenderTargetView();
-    auto dsv = dsvHeap->GetCPUDescriptorHandleForHeapStart();
+    auto dsv = dsvTable.getDescriptorHandle();
 
     // Clear the render targets
     {
@@ -270,16 +248,9 @@ void Tutorial2::onRender()
     }
 
     commandList->SetPipelineState(pipelineState.Get());
-    commandList->SetGraphicsRootSignature(rootSignature.Get());
+    commandList->SetGraphicsRootSignature(rootSignature->getRootSignature().Get());
 
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    //D3D12_VERTEX_BUFFER_VIEW* views = (D3D12_VERTEX_BUFFER_VIEW*) malloc(sizeof(D3D12_VERTEX_BUFFER_VIEW) * 2);
-    //views[0] = vertexPosBufferView;
-    //views[1] = vertexColorBufferView;
-
-    //commandList->IASetVertexBuffers(0, 2, views);
-    //commandList->IASetIndexBuffer(&indexBufferView);
 
     vao->bind(commandList);
 
@@ -294,7 +265,19 @@ void Tutorial2::onRender()
         auto m = modelMatrix * XMMatrixTranslation(i, 0, 30);
         XMMATRIX mvpMatrix = XMMatrixMultiply(m, viewMatrix);
         mvpMatrix = XMMatrixMultiply(mvpMatrix, projectionMatrix);
-        commandList->SetGraphicsRoot32BitConstants(0, sizeof(XMMATRIX) / 4, &mvpMatrix, 0);
+
+        //commandList->SetGraphicsRoot32BitConstants(0, sizeof(XMMATRIX) / 4, &mvpMatrix, 0)
+
+        // CB size need to be 256-byte aligned!
+        UploadBuffer::Allocation heapAllocation = uploadBuffer->allocate(sizeof(XMMATRIX), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+        memcpy(heapAllocation.cpu, &mvpMatrix, sizeof(XMMATRIX));
+        commandList->SetGraphicsRootConstantBufferView(0, heapAllocation.gpu);
+
+        //D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+        //cbvDesc.BufferLocation = heapAllocation.gpu;
+        //cbvDesc.SizeInBytes = sizeof(XMMATRIX);
+        //Application::Get()->getDevice()->CreateConstantBufferView(&cbvDesc, )
+        //cbvDescriptorHeap->stageDescriptors(0, 0, 1, )
 
         commandList->DrawIndexedInstanced(_countof(g_Indicies), 1, 0, 0, 0);
     }
@@ -311,7 +294,9 @@ void Tutorial2::onRender()
         commandQueueDirect->waitForFenceValue(frameFenceValues[currentBackBufferIndex]);
     }
 
-    //free(views);
+    //cbvDescriptorHeap->reset();
+    dsvDescAllocator->releaseStaleDescriptors(Application::Get()->getFrameCount());
+    uploadBuffer->reset();
 }
 
 void Tutorial2::onKeyPressed(KeyEvent& event)
@@ -415,6 +400,6 @@ void Tutorial2::resizeDepthBuffer(int width, int height)
         dsv.Texture2D.MipSlice = 0;
         dsv.Flags = D3D12_DSV_FLAG_NONE;
 
-        device->CreateDepthStencilView(depthBuffer.Get(), &dsv, dsvHeap->GetCPUDescriptorHandleForHeapStart());
+        device->CreateDepthStencilView(depthBuffer.Get(), &dsv, dsvTable.getDescriptorHandle());
     }
 }

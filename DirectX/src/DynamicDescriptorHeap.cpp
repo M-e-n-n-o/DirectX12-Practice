@@ -19,7 +19,7 @@ DynamicDescriptorHeap::DynamicDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, ui
 	m_descriptorHandleCache = std::make_unique<D3D12_CPU_DESCRIPTOR_HANDLE[]>(m_numDescriptorsPerHeap);
 }
 
-void DynamicDescriptorHeap::stageDescriptors(uint32_t rootParameterIndex, uint32_t offset, uint32_t numDescriptors, const D3D12_CPU_DESCRIPTOR_HANDLE srcDescriptors)
+void DynamicDescriptorHeap::stageDescriptors(uint32_t rootParameterIndex, uint32_t offset, uint32_t numDescriptors, const D3D12_CPU_DESCRIPTOR_HANDLE srcDescriptor)
 {
 	// Cannot stage more than the maximum number of descriptors per heap
 	// Cannot stage more than the MaxDescriptorTables root parameters
@@ -40,7 +40,7 @@ void DynamicDescriptorHeap::stageDescriptors(uint32_t rootParameterIndex, uint32
 	D3D12_CPU_DESCRIPTOR_HANDLE* dstDescriptor = (descriptorTableCache.baseDescriptor + offset);
 	for (uint32_t i = 0; i < numDescriptors; ++i)
 	{
-		dstDescriptor[i] = CD3DX12_CPU_DESCRIPTOR_HANDLE(srcDescriptors, i, m_descriptorHandleIncrementSize);
+		dstDescriptor[i] = CD3DX12_CPU_DESCRIPTOR_HANDLE(srcDescriptor, i, m_descriptorHandleIncrementSize);
 	}
 
 	// Set the root parameter index bit to make sure the descriptor table
