@@ -1,8 +1,6 @@
 #include "dxpch.h"
 #include "UploadBuffer.h"
-
 #include "Application.h"
-#include "Helpers.h"
 
 #include <new>
 
