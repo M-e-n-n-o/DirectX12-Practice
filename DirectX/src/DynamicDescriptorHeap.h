@@ -12,6 +12,9 @@
 class CommandList;
 class RootSignature;
 
+/*
+* Class which handles copying CPU visible descriptors to GPU visible descriptor heaps and actually binding them to the command list.
+*/
 class DynamicDescriptorHeap
 {
 public:

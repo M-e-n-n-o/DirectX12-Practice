@@ -10,6 +10,7 @@
 
 /*
 *	An UploadBuffer provides a convenient method to upload resources to the GPU.
+*	Creates a temporary CPU resource and copies it over to the GPU resource.
 *	A single instance of an UploadBuffer can only be associated to a single command list/allocator!
 */
 class UploadBuffer

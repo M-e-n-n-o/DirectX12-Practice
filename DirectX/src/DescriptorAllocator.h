@@ -13,6 +13,11 @@
 class DescriptorAllocatorPage;
 
 // https://learn.microsoft.com/en-us/windows/win32/direct3d12/resource-binding-flow-of-control
+
+/*
+*	Class which allocates CPU visible decriptor heaps and the descriptors themselfs.
+*	Uses free list memory allocation scheme.
+*/
 class DescriptorAllocator
 {
 public:

@@ -62,12 +62,12 @@ private:
     // Vertex buffer cube
     std::shared_ptr<VertexArray> vao;
 
-
+    // Uploads data to GPU resource
     std::shared_ptr<UploadBuffer> uploadBuffer;
-
-
-    std::shared_ptr<DescriptorAllocator> cbvDescAllocator;
-    std::shared_ptr<DynamicDescriptorHeap> cbvDescriptorHeap[SWAPCHAIN_BUFFER_COUNT];
+    // Allocates CPU descriptors + heaps
+    std::shared_ptr<DescriptorAllocator> cbvCPUDescAllocator;
+    // Handles CPU to GPU descriptor copying + GPU heaps
+    std::shared_ptr<DynamicDescriptorHeap> cbvGPUDescriptorHeap[SWAPCHAIN_BUFFER_COUNT];
 
     //Microsoft::WRL::ComPtr<ID3D12Resource> vertexPosBuffer;
     //D3D12_VERTEX_BUFFER_VIEW vertexPosBufferView;
