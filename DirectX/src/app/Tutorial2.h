@@ -64,7 +64,10 @@ private:
 
 
     std::shared_ptr<UploadBuffer> uploadBuffer;
-    //std::shared_ptr<DynamicDescriptorHeap> cbvDescriptorHeap;
+
+
+    std::shared_ptr<DescriptorAllocator> cbvDescAllocator;
+    std::shared_ptr<DynamicDescriptorHeap> cbvDescriptorHeap[SWAPCHAIN_BUFFER_COUNT];
 
     //Microsoft::WRL::ComPtr<ID3D12Resource> vertexPosBuffer;
     //D3D12_VERTEX_BUFFER_VIEW vertexPosBufferView;

@@ -9,7 +9,7 @@
 class CommandList
 {
 public:
-	CommandList(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList)
+	CommandList(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2>& commandList)
 		:	m_commandList(commandList)
 	{}
 

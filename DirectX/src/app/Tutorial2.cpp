@@ -139,8 +139,8 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
     CD3DX12_ROOT_PARAMETER1 rootParameters[1];
     ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_NONE);
     //rootParameters[0].InitAsConstants(sizeof(XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
-    //rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);
-    rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX);
+    rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);
+    //rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX);
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
     rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, rootSignatureFlags);
@@ -150,8 +150,12 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
 
     uploadBuffer = std::make_shared<UploadBuffer>();
 
-    //cbvDescriptorHeap = std::make_shared<DynamicDescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    //cbvDescriptorHeap->parseRootSignature(*rootSignature);
+    for (int i = 0; i < SWAPCHAIN_BUFFER_COUNT; i++)
+    {
+        cbvDescriptorHeap[i] = std::make_shared<DynamicDescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    }
+    
+    cbvDescAllocator = std::make_shared<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     struct PipelineStateStream
     {
@@ -231,11 +235,19 @@ void Tutorial2::onRender()
     }
 
     auto commandList = commandQueueDirect->getCommandList();
+    CommandList cl(commandList);
 
     UINT currentBackBufferIndex = swapChain->getCurrentBackBufferIndex();
     auto backBuffer = swapChain->getCurrentBackBuffer();
     auto rtv = swapChain->getCurrentRenderTargetView();
     auto dsv = dsvTable.getDescriptorHandle();
+
+    cbvDescriptorHeap[currentBackBufferIndex]->reset();
+    uploadBuffer->reset();
+    cbvDescAllocator->releaseStaleDescriptors(Application::Get()->getFrameCount());
+    dsvDescAllocator->releaseStaleDescriptors(Application::Get()->getFrameCount());
+
+    cbvDescriptorHeap[currentBackBufferIndex]->parseRootSignature(*rootSignature);
 
     // Clear the render targets
     {
@@ -263,21 +275,25 @@ void Tutorial2::onRender()
     for (int i = -20; i <= 20; i += 5)
     {
         auto m = modelMatrix * XMMatrixTranslation(i, 0, 30);
-        XMMATRIX mvpMatrix = XMMatrixMultiply(m, viewMatrix);
-        mvpMatrix = XMMatrixMultiply(mvpMatrix, projectionMatrix);
+        auto mvpMatrix = m * viewMatrix;
+        mvpMatrix = mvpMatrix * projectionMatrix;
 
         //commandList->SetGraphicsRoot32BitConstants(0, sizeof(XMMATRIX) / 4, &mvpMatrix, 0)
 
         // CB size need to be 256-byte aligned!
-        UploadBuffer::Allocation heapAllocation = uploadBuffer->allocate(sizeof(XMMATRIX), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-        memcpy(heapAllocation.cpu, &mvpMatrix, sizeof(XMMATRIX));
-        commandList->SetGraphicsRootConstantBufferView(0, heapAllocation.gpu);
+        UploadBuffer::Allocation resourceAllocation = uploadBuffer->allocate(sizeof(XMMATRIX), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+        memcpy(resourceAllocation.cpu, &mvpMatrix, sizeof(XMMATRIX));
 
-        //D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
-        //cbvDesc.BufferLocation = heapAllocation.gpu;
-        //cbvDesc.SizeInBytes = sizeof(XMMATRIX);
-        //Application::Get()->getDevice()->CreateConstantBufferView(&cbvDesc, )
-        //cbvDescriptorHeap->stageDescriptors(0, 0, 1, )
+        //commandList->SetGraphicsRootConstantBufferView(0, heapAllocation.gpu);
+
+        DescriptorAllocation cbvTable = cbvDescAllocator->allocate();
+
+        D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+        cbvDesc.BufferLocation = resourceAllocation.gpu;
+        cbvDesc.SizeInBytes = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
+        Application::Get()->getDevice()->CreateConstantBufferView(&cbvDesc, cbvTable.getDescriptorHandle());
+        cbvDescriptorHeap[currentBackBufferIndex]->stageDescriptors(0, 0, 1, cbvTable.getDescriptorHandle());
+        cbvDescriptorHeap[currentBackBufferIndex]->commitStagedDescriptorsForDraw(cl);
 
         commandList->DrawIndexedInstanced(_countof(g_Indicies), 1, 0, 0, 0);
     }
@@ -293,14 +309,11 @@ void Tutorial2::onRender()
         // Wait until the new backbuffer is ready to be used
         commandQueueDirect->waitForFenceValue(frameFenceValues[currentBackBufferIndex]);
     }
-
-    //cbvDescriptorHeap->reset();
-    dsvDescAllocator->releaseStaleDescriptors(Application::Get()->getFrameCount());
-    uploadBuffer->reset();
 }
 
 void Tutorial2::onKeyPressed(KeyEvent& event)
 {
+
 }
 
 void Tutorial2::onResize(ResizeEvent& event)
