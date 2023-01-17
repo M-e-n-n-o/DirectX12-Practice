@@ -176,6 +176,7 @@
     <ClInclude Include="external\Helpers.h" />
     <ClInclude Include="src\app\Tutorial1.h" />
     <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\ResourceStateTracker.h" />
     <ClInclude Include="src\RootSignature.h" />
     <ClInclude Include="src\SwapChain.h" />
     <ClInclude Include="src\UploadBuffer.h" />
@@ -192,6 +193,7 @@
     <ClCompile Include="src\dxpch.cpp" />
     <ClCompile Include="src\DynamicDescriptorHeap.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\ResourceStateTracker.cpp" />
     <ClCompile Include="src\RootSignature.cpp" />
     <ClCompile Include="src\SwapChain.cpp" />
     <ClCompile Include="src\UploadBuffer.cpp" />
