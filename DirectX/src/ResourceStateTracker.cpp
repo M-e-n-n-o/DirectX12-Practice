@@ -193,7 +193,7 @@ void ResourceStateTracker::Unlock()
 	s_globalMutex.unlock();
 }
 
-void ResourceStateTracker::AddGlobalResourceStates(ID3D12Resource* resource, D3D12_RESOURCE_STATES state)
+void ResourceStateTracker::AddGlobalResourceState(ID3D12Resource* resource, D3D12_RESOURCE_STATES state)
 {
 	if (resource != nullptr)
 	{

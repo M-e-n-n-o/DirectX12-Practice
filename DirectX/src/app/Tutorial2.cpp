@@ -155,7 +155,7 @@ std::shared_ptr<Window> Tutorial2::Initialize(const WindowSettings& settings)
         cbvGPUDescriptorHeap[i] = std::make_shared<DynamicDescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 9);
     }
     
-    cbvCPUDescAllocator = std::make_shared<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    cbvCPUDescAllocator = std::make_shared<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
 
     struct PipelineStateStream
     {
