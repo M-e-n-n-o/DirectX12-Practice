@@ -271,7 +271,7 @@ void Tutorial2::onRender()
 
     commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 
-    // Only create 1 CPU visible descriptor table for all the objects because each object can overwrite 
+    // Only create 1 CPU visible descriptor table (in a heap) for all the objects because each object can overwrite 
     // the previous one because the data in the table will be copied over to a GPU visible descriptor 
     // before the next object is submitted to the commandlist.
     DescriptorAllocation cbvCPUTable = cbvCPUDescAllocator->allocate();
@@ -290,7 +290,7 @@ void Tutorial2::onRender()
         memcpy(resourceAllocation.cpu, &mvpMatrix, sizeof(XMMATRIX));
 
         // Inline CBV (not in a table)
-        //commandList->SetGraphicsRootConstantBufferView(0, heapAllocation.gpu);
+        //commandList->SetGraphicsRootConstantBufferView(0, resourceAllocation.gpu);
 
         D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
         cbvDesc.BufferLocation = resourceAllocation.gpu;
